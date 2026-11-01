@@ -1,7 +1,7 @@
 [project]
 name = "hyperiad"
 dynamic = ["version"]
-description = "Hyperiad: a language and notebook for higher-arity mathematics (hypermatrices, hypergraphs, rewriting)"
+description = "Hyperiad: a language for higher-arity mathematics (hypermatrices, hypergraphs, rewriting)"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

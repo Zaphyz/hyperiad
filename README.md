@@ -1,11 +1,13 @@
 # Hyperiad
 
-A language and notebook for higher-arity mathematics. Compute and visualize hypermatrices and their
-contractions, hypergraphs and rewrite rules with their causal structure, and plex diagrams. Code goes in
-cells; the objects it computes are drawn in the output.
+A language for higher-arity mathematics.
 
-Hyperiad is the computational framework of [Arity Science](https://arity.science), a research programme
-on the compositional structure of higher-order systems. Its findings are published as Hyperiad notebooks.
+Hyperiad is the computational framework built to conduct the research of the
+[Arity Science](https://arity.science) project. Compute and visualize hypermatrices, hypergraphs and rewrite
+rules with their causal structure. Our findings are published as Hyperiad notebooks, so every figure can be
+recomputed, changed and downloaded.
+
+Code goes in cells; the objects it computes are drawn in the output.
 
 **Try it in your browser, with nothing to install:** https://arity.science/hyperiad/notebook/
 
