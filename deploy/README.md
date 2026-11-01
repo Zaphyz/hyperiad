@@ -26,6 +26,10 @@ and `wrangler.jsonc` (`max_instances`, `instance_type`).
 
 ## Deploying
 
+To run your own server from a fork, change `name` and `routes` in `wrangler.jsonc` (the route here is
+arity.science's; remove `routes` to use the Worker's `workers.dev` address), and add your site to
+`ALLOWED_ORIGINS` in `src/index.ts`.
+
 Workers Builds deploys this folder on every push to `main`: in the Cloudflare dashboard,
 Workers & Pages → Create → Import a repository → `Zaphyz/hyperiad`, root directory
 `deploy`, deploy command `npx wrangler deploy`. The first deploy builds and uploads the image;

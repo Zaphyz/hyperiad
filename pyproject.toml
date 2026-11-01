@@ -40,4 +40,6 @@ line-length = 120
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
+# Import order ("I") is not checked here: it follows the layout of the monorepo this is exported from,
+# and is settled there when changes are brought back.
+select = ["E", "F", "B", "UP"]

@@ -254,6 +254,15 @@ own once it stabilizes.
   Worker answers `/info` itself, so loading a notebook never wakes a container. Deployed by Workers
   Builds on every push to `main`; see `hyperiad/deploy/README.md`.
 
+- **Public repository** (owner, 2026-11-01): github.com/Zaphyz/hyperiad, open to forks and pull requests.
+  It is an export of this repository, not a separate line of development: work continues here, where
+  the toolkits change with the research, and `hyperiad/export/sync.py` maps files one to one between
+  the two (`export` writes and commits the export, `import` applies merged pull requests back here as
+  a three-way patch, `status` lists what changed there). The export is one installable package
+  (`hyperiad`, with the `frontier` subset, `hypermatrix` and `infrageometry` under `src/`); 300 tests
+  run there standalone. The bundle the browser loads is found through the installed packages, so it
+  is the same in both layouts.
+
 ### Syntax (provisional)
 
 | written | meaning |
