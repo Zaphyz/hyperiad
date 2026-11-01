@@ -74,3 +74,7 @@ Hyperiad builds on the [Hypergraphs paclet](https://github.com/Zaphyz/Hypergraph
 [Nikolay Murzin](https://github.com/sw1sh). That work was done in the context of our interaction at the
 Wolfram Institute. The array algebra and the plex formalism follow
 [Heaps of Fish](https://arxiv.org/abs/2205.05456).
+
+## License
+
+[MIT](LICENSE). Contributions are accepted under the same license.

@@ -3,6 +3,8 @@ name = "hyperiad"
 dynamic = ["version"]
 description = "Hyperiad: a language and notebook for higher-arity mathematics (hypermatrices, hypergraphs, rewriting)"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = ["numpy>=2.0", "sympy>=1.13", "networkx>=3.2"]
 

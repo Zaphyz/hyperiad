@@ -18,6 +18,9 @@ Definitions are research decisions. When a change needs a definition pinned down
 readings, or a convention that changes which statements hold), open an issue to discuss it before writing
 the code.
 
+By opening a pull request you agree that your contribution is licensed under the MIT License, as the rest
+of the repository is (see `LICENSE`).
+
 ## How this repository is maintained
 
 Hyperiad is developed inside the Arity Science research workspace and exported here; every sync is a
