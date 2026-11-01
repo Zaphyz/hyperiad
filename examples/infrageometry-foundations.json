@@ -1,0 +1,891 @@
+{
+ "title": "Infrageometry foundations",
+ "contents": true,
+ "cells": [
+  {
+   "type": "text",
+   "source": "# Infrageometry: the foundations\n\nSpace is a hypergraph. Its **vertices are the points**; its **edges are the connectivity** between points, standing where the continuum has uncountably many points between any two. Pointing from a vertex into an edge that contains it is an **infinitesimal motion**, a tangent vector, and an integrated motion goes from a vertex into an edge, out of the edge to a vertex, and on.\n\nThe direction of infrageometry is that **algebra is replaced by rewriting**. In differential geometry vector fields are derivations, and derivations compose into new differential operators; this makes sense because the objects are total, defined on whole domains. Here objects are partial and finitary: a field is a distribution of edges of its own type, and every operation that would be algebra is a rewrite rule acting on those edges. Composing flows is a rule like transitive closure; deforming a path is a rule that pushes its edges across the areas of space; a homotopy is a chain of such rewrites, a proof one can watch.\n\nThe notebook has three parts: **I** space and motion (points, topology, tangent vectors, motions, subspaces); **II** algebra as rewriting (homotopy by deformation and the fundamental group, motion as rewriting, vector fields of departures and arrivals, cancellation of opposite directions, integration, composition, the bracket, and scalar fields by multiplicity); **III** map versions of the notions (maps, scalar functions, flows, local models)."
+  },
+  {
+   "type": "text",
+   "source": "## How to read it\n\nEach notion comes as a definition, then Hyperiad code that builds an example, then its picture. The code is live in a Hyperiad notebook with a kernel; this page shows outputs computed ahead of time.\n\n> **Definition.** A definition as currently registered (`infrageometry.*`, maturity *sketch* or *working*).\n\n> **Claim.** A statement with its evidence: an informal argument and an exhaustive or random computer check. Registered as *supported*; whether an argument counts as a proof is your decision.\n\n> **Choice.** A convention you have settled, with its date.\n\n> **Question.** Something that is yours to decide, or a reading of your words that you should confirm.\n\n> **Proposal.** A further notion suggested but not built yet.\n\n> **Device.** A tool from outside the hypergraphic core (real numbers, linear algebra), kept apart for side directions.\n\n**Colours.** The space is drawn in one neutral blue. What a cell points at (a region, the window a rewrite touched, a moving point) is **amber**. Objects drawn on the space take desaturated tones: motions and paths **green**, tangent vectors and derivatives **blue**, flows **brown**; the edges of fields are coloured by their role in a picture: the first field green, the second blue, the composite of the first with the second brown and the other composite red, a bracket violet, a closure in its field's colour. A vector field's arcs run between a vertex and the star of an edge, so a step of a field is two arrows meeting at a star; a scalar field's unary edges are concentric disks at their vertex, one disk per copy. An edge seen as a point of space, an *infinitesimal position*, is a small **four-pointed star**; in a highlighted region a star marks an edge that belongs to it without all of its vertices."
+  },
+  {
+   "type": "text",
+   "source": "# Part I · Space and motion"
+  },
+  {
+   "type": "text",
+   "source": "# 1. Space\n\n> **Definition** (spatial hypergraph). A spatial hypergraph $H = (V, E)$ is an undirected simple hypergraph: a set $V$ of points and a set $E$ of nonempty subsets of $V$, so no edge repeats and no vertex repeats within an edge. An edge $\\{v\\}$ with a single vertex is allowed. $H$ is *finitary* when every point lies on finitely many edges and every edge is finite.\n\n> **Choice** (2026-10-27, 2026-10-28). Space is an undirected simple hypergraph; vertices are points, edges are connectivity. Unary edges are allowed.\n\nThe running example has a hyperedge $\\{1,2,3\\}$, a binary edge $\\{1,2\\}$ inside it, a path $3 - 4$, a second hyperedge $\\{4,5,6\\}$ and an edge $\\{2,6\\}$ closing a loop."
+  },
+  {
+   "type": "code",
+   "source": "h = ExampleSpace()"
+  },
+  {
+   "type": "text",
+   "source": "Unary edges are drawn as disks round their vertex, binary edges as lines, larger edges as concave regions."
+  },
+  {
+   "type": "code",
+   "source": "SpatialHypergraph([[1], [1, 2], [2, 3, 4], [4], [4, 5]])"
+  },
+  {
+   "type": "text",
+   "source": "# 2. The incidence space\n\nThe edges are not only connectivity: each edge is itself a place where a moving point can be, *between* its vertices. Putting vertices and edges side by side as points of one space gives the topology.\n\n> **Definition** (incidence space). The incidence space $X(H)$ is the set $V \\sqcup E$ ordered by incidence, $v \\le e$ iff $v \\in e$, with the topology whose open sets are the up-sets (the Alexandrov topology). Vertices are **closed points**, the *positions*; edges are **open points**, the *infinitesimal positions*. The smallest open set about a vertex is $U_v = \\{v\\} \\cup \\operatorname{St}(v)$, the vertex with its **star** (the edges through it); about an edge it is $U_e = \\{e\\}$.\n\n> **Choice** (2026-10-28). The topology of space is the incidence space: hyperedges serve as infinitesimal positions.\n\n$X(H)$ is drawn as its diagram: positions below, infinitesimal positions above, a line for each incidence."
+  },
+  {
+   "type": "code",
+   "source": "IncidenceSpace(h)"
+  },
+  {
+   "type": "text",
+   "source": "Every neighbourhood of a position contains the infinitesimal positions around it. Step through all eleven points of $X(H)$ and their smallest open sets:"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(MinimalOpen(h, x), [x, Points(h)])"
+  },
+  {
+   "type": "text",
+   "source": "Closure goes the other way: the closure of an edge is the edge with its vertices. The closure of $U_2$ adds the far vertices of the edges through $2$:"
+  },
+  {
+   "type": "code",
+   "source": "Closure(MinimalOpen(h, 2))"
+  },
+  {
+   "type": "code",
+   "source": "[OpenQ(MinimalOpen(h, 2)), ClosedQ(MinimalOpen(h, 2)), ClosedQ(Closure(MinimalOpen(h, 2)))]"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (closed sets are sub-hypergraphs). The closed subsets of $X(H)$ are exactly the sub-hypergraphs of $H$ (sets of edges with a set of vertices containing them); the open subsets are exactly the regions holding the star of each of their vertices. *Argument:* open sets are up-sets, so closed sets are down-sets. *Check:* topology generated from the minimal open sets, every subset of $X(H)$, 300 random spaces.\n\nThe **frontier** of a region is its closure minus its interior. The open hull of a set of positions, $U \\cup \\operatorname{St}(U)$, has the positions one step outside $U$ as its frontier:"
+  },
+  {
+   "type": "code",
+   "source": "Frontier(OpenHull(Region(h, [1])))"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (frontier of an open hull). For a set of positions $U$, the frontier of $U \\cup \\operatorname{St}(U)$ is $N[U] \\setminus U$. For a closed subspace $S$, the frontier is the set of its positions where some edge of $H$ leaves $S$. *Check:* every vertex set and sub-hypergraph of 300 random spaces.\n\n### Its shape: loops, and why hyperedges are not filled\n\n> **Claim** (homotopy type). $X(H)$ is weakly homotopy equivalent to the incidence graph of $H$ (McCord, 1966: a finite $T_0$ space is weakly equivalent to the order complex of its order, here a graph). So its fundamental group as a topological space is free, of rank $b_1 = |I| - |V| - |E| + c$ (incidences, positions, infinitesimal positions, components).\n\nIn particular a hyperedge is not a filled triangle: the edge $\\{1,2\\}$ and the hyperedge $\\{1,2,3\\}$ are two different infinitesimal positions between $1$ and $2$, and going out through one and back through the other is a loop that cannot be undone."
+  },
+  {
+   "type": "code",
+   "source": "FirstBetti(h)"
+  },
+  {
+   "type": "code",
+   "source": "IncidenceGroupGenerators(h, 1)"
+  },
+  {
+   "type": "text",
+   "source": "Read as a simplicial complex (every edge a filled simplex) the same space would have only one loop. The incidence space keeps the parallel connection as a genuine hole. The homotopy of paths and motions used from Part II on fills hyperedges in (§7); this topological one is kept as *incidence homotopy*."
+  },
+  {
+   "type": "text",
+   "source": "# 3. Neighbourhoods, distance and the link\n\n> **Definition** (neighbourhood, distance, ball). The neighbourhood $N[v]$ is $v$ with every position sharing an edge with it: the positions of the closure of $U_v$. The **hop distance** $d(v, w)$ is the least number of edges crossed by a motion from $v$ to $w$; the ball $B_r(v)$ holds the positions within $r$ steps and the sphere $S_r(v)$ those exactly $r$ steps away."
+  },
+  {
+   "type": "code",
+   "source": "Neighbourhood(h, 2)"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(Ball(h, 1, r), [r, 0, 3])"
+  },
+  {
+   "type": "code",
+   "source": "[HopDistance(h, 1, 5), HopDistance(h, 3, 6)]"
+  },
+  {
+   "type": "text",
+   "source": "> **Definition** (link). The link $\\operatorname{Lk}(v)$ is the spatial hypergraph on the neighbours of $v$ whose edges are $e \\setminus \\{v\\}$ for the edges $e \\ni v$ of size at least two. Its edges match the non-stationary directions at $v$ one to one: the link is the **unit sphere of directions** at $v$.\n\nAt $2$ the three directions are towards $1$ (along $\\{1,2\\}$), towards the pair $\\{1,3\\}$ (into the hyperedge) and towards $6$:"
+  },
+  {
+   "type": "code",
+   "source": "Link(h, 2)"
+  },
+  {
+   "type": "text",
+   "source": "On a triangulated sphere, given by its triangles, the link of every point is a cycle: a circle of directions."
+  },
+  {
+   "type": "code",
+   "source": "Octahedron()"
+  },
+  {
+   "type": "code",
+   "source": "Link(Octahedron(), 1)"
+  },
+  {
+   "type": "text",
+   "source": "### Dimension\n\n> **Definition** (link dimension). $\\dim_v H = 1 + \\max_w \\dim_w \\operatorname{Lk}(v)$ over the points $w$ of the link, with the maximum over no points equal to $-1$. A point on no edge but $\\{v\\}$ has dimension $0$, a point of a graph dimension $1$, a point inside a triangle dimension $2$."
+  },
+  {
+   "type": "code",
+   "source": "[LinkDimension(h), LinkDimension(GridSpace(5, 5)), LinkDimension(Octahedron()), LinkDimension(SpatialHypergraph([[1]]))]"
+  },
+  {
+   "type": "text",
+   "source": "The square grid has link dimension $1$: as a hypergraph it is a graph. Its two-dimensionality is large-scale, visible in how fast balls grow. Counting is hypergraphic:"
+  },
+  {
+   "type": "code",
+   "source": "BallGrowth(GridSpace(15, 15), 113, 6)"
+  },
+  {
+   "type": "text",
+   "source": "> **Device** (growth dimension). Turning that growth into a number $d$ with $|B_r| \\sim r^d$ needs logarithms: $\\log(|B_{r+1}|/|B_r|) / \\log((r+1)/r)$. It is kept as a device, outside the core."
+  },
+  {
+   "type": "code",
+   "source": "GrowthDimension(GridSpace(31, 31), 481, 10)"
+  },
+  {
+   "type": "text",
+   "source": "# 4. Tangent vectors: infinitesimal motion\n\n> **Definition** (tangent vector). A tangent vector at a position $v$ is a **departure** $v \\rightharpoonup e$ with $e \\ni v$: the infinitesimal motion from $v$ into the infinitesimal position $e$. The **tangent space** $T_vH$ is the set of departures at $v$, one per edge through $v$. The **tangent bundle** $TH$ is the set of all departures, one per incidence.\n\n> **Choice** (2026-10-27). Pointing from a vertex towards an edge that contains it is an infinitesimal motion; an integrated motion goes vertex → edge → vertex → …"
+  },
+  {
+   "type": "code",
+   "source": "TangentSpace(h, 2)"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(TangentSpace(h, v), [v, Positions(h)])"
+  },
+  {
+   "type": "code",
+   "source": "[Length(TangentBundle(h)), Degree(h, 2)]"
+  },
+  {
+   "type": "text",
+   "source": "### The zero vector is a unary edge\n\nThere is no zero vector unless the space supplies one. A unary edge $\\{v\\}$ does: the departure $v \\rightharpoonup \\{v\\}$ goes into an infinitesimal position that is around $v$ alone, so it moves nowhere. It is the **stationary** tangent vector."
+  },
+  {
+   "type": "code",
+   "source": "TangentSpace(WithUnaryEdges(h), 2)"
+  },
+  {
+   "type": "code",
+   "source": "StationaryQ(Departure(2, [2]))"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (departures are germs of paths). In $X(H)$, the germs at $0$ of continuous paths $\\gamma$ with $\\gamma(0) = v$ that are constant just after $0$ are exactly: staying at $v$, and moving into one edge $e \\ni v$. So the tangent vectors at $v$ are precisely the ways of leaving $v$ continuously. *Argument:* the preimage of $U_v$ is open and contains $0$; conversely every open set containing $v$ contains the edges through $v$.\n\n> **Device** (linear tangent space). The free abelian group $\\mathbb{Z}[T_vH]$ of formal combinations of departures, of rank $\\deg v$, can be kept for comparison with the continuum. The core uses $T_vH$ as a set."
+  },
+  {
+   "type": "text",
+   "source": "# 5. Motions\n\n> **Definition** (motion graph). The motion graph $M(H)$ has the points of $X(H)$ as nodes, a departure $v \\rightharpoonup e$ and an arrival $e \\rightharpoonup v$ for each incidence. Every line of the diagram below stands for one of each."
+  },
+  {
+   "type": "code",
+   "source": "MotionGraph(h)"
+  },
+  {
+   "type": "text",
+   "source": "> **Definition** (motion). A motion is a walk in $M(H)$: points of $X(H)$ alternating between positions and infinitesimal positions, each incident to the next, such as $(v_0, e_1, v_1, \\dots, e_n, v_n)$ with $v_{i-1}, v_i \\in e_i$. It has $2n$ **half-steps** and $n$ **steps**. At a position $v_i$ it has a **velocity** $v_i \\rightharpoonup e_{i+1}$ and an **incoming direction** $v_i \\rightharpoonup e_i$ (the arrival read backwards). A step that returns to the position it left is a *stall*."
+  },
+  {
+   "type": "code",
+   "source": "m = Motion(h, [1, [1, 2, 3], 3, [3, 4], 4, [4, 5, 6], 6])"
+  },
+  {
+   "type": "text",
+   "source": "Played half-step by half-step, a token alternates between positions and infinitesimal positions:"
+  },
+  {
+   "type": "code",
+   "source": "AnimateMotion(m)"
+  },
+  {
+   "type": "code",
+   "source": "[IncomingDirection(m, 3), Velocity(m, 3)]"
+  },
+  {
+   "type": "text",
+   "source": "> **Definition** (geodesic). A geodesic is a motion with fewest half-steps between its ends; between positions its number of steps is the hop distance. A motion may also end at an infinitesimal position."
+  },
+  {
+   "type": "code",
+   "source": "g = Geodesic(h, 1, 5)"
+  },
+  {
+   "type": "code",
+   "source": "Geodesic(h, 1, [4, 5, 6])"
+  },
+  {
+   "type": "text",
+   "source": "### Curves are maps from intervals\n\n> **Definition** (interval, curve). The interval $I_n$ is the path on $0, 1, \\dots, n$. A motion with $n$ steps between positions is the same thing as a map $\\gamma: I_n \\to H$ (maps are in §15): $i \\mapsto v_i$, $\\{i-1, i\\} \\mapsto e_i$. Its velocity at $i$ is the pushforward of $i \\rightharpoonup \\{i, i+1\\}$.\n\nEach vertex of the interval is labelled with its image:"
+  },
+  {
+   "type": "code",
+   "source": "c = CurveOfMotion(g)"
+  },
+  {
+   "type": "code",
+   "source": "Pushforward(c, Departure(1, [1, 2])) == Velocity(g, 3)"
+  },
+  {
+   "type": "text",
+   "source": "As in the continuum, the velocity of a curve is the pushforward of the unit tangent of the interval."
+  },
+  {
+   "type": "text",
+   "source": "# 6. Subspaces\n\n> **Definition** (subspace). A subspace is a subset $S$ of $X(H)$ with the subspace topology. It is again an incidence space: of the spatial hypergraph whose positions are those of $S$ and whose edges are the traces $e \\cap S$ of the edges of $S$ (when these are nonempty and different). A **closed** subspace is a sub-hypergraph; an **open** one contains, with each position, all edges through it, so edges may dangle.\n\nA closed subspace, and its frontier: the positions where an edge of $H$ leaves it."
+  },
+  {
+   "type": "code",
+   "source": "S = Closure(Region(h, [[1, 2, 3], [3, 4]]))"
+  },
+  {
+   "type": "code",
+   "source": "ClosedQ(S)"
+  },
+  {
+   "type": "code",
+   "source": "Frontier(S)"
+  },
+  {
+   "type": "text",
+   "source": "An open subspace: the open hull of $\\{2, 3\\}$ holds every edge through them, dangling ones included."
+  },
+  {
+   "type": "code",
+   "source": "OpenHull(Region(h, [2, 3]))"
+  },
+  {
+   "type": "text",
+   "source": "A subspace need be neither. Two positions with the hyperedge between them, $\\{1, 2, \\{1,2,3\\}\\}$, is the hyperedge seen through two of its vertices; as a space it is a single binary edge."
+  },
+  {
+   "type": "code",
+   "source": "Region(h, [1, 2, [1, 2, 3]])"
+  },
+  {
+   "type": "code",
+   "source": "Subspace(Region(h, [1, 2, [1, 2, 3]]))"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (subspaces are traces). A subset $S \\subseteq X(H)$ whose edges meet its positions in different nonempty sets is homeomorphic to the incidence space of its trace hypergraph. *Argument:* subspaces of Alexandrov spaces carry the restricted order. *Check:* 5007 subsets of 200 random spaces.\n\n> **Definition** (tangent and normal directions of a subspace). For a closed subspace $S$ and a position $v$ of it, $T_vS \\subseteq T_vH$ are the departures into edges of $S$; the remaining departures are its **normal** directions. The frontier of $S$ is exactly where it has normal directions."
+  },
+  {
+   "type": "text",
+   "source": "# Part II · Algebra as rewriting"
+  },
+  {
+   "type": "text",
+   "source": "# 7. Homotopy by deformation across areas\n\nA path is deformed by rewriting its edges. Where three positions lie in one edge of size at least three, an **area** of space, a step $a \\to b$ can be pushed across the area to the two steps $a \\to c \\to b$, and back. Two paths are the same up to deformation exactly when such rewrites lead from one to the other, and the chain of rewrites is the proof.\n\n> **Choice** (2026-10-29). Homotopy deformation is a rewrite rule that deforms the binary edges of paths along vertices connected by higher-arity edges: paths are deformed across existing areas of space, and the rule drives the equivalence of paths.\n\n> **Choice** (2026-10-29). Area homotopy is the primary homotopy. The homotopy of motions is derived from it.\n\n> **Definition** (step path). A step path is a word $v_0 v_1 \\dots v_n$ of positions, each two consecutive ones in a common edge of space: a chain of directed binary *path edges*. It is a motion with its infinitesimal positions forgotten.\n\n> **Definition** (area homotopy). Paths are rewritten by four rules and their inverses: **contract** $a\\,c\\,b \\to a\\,b$ and **expand** $a\\,b \\to a\\,c\\,b$ when $a, b, c$ are distinct and lie in one edge of size $\\ge 3$; **cancel** $a\\,b\\,a \\to a$; **stall** $a\\,a \\to a$. Two paths with the same ends are **area-homotopic** when a chain of rewrites, a **derivation**, turns one into the other.\n\nThe rules, each as its path before and after (the area it uses highlighted):"
+  },
+  {
+   "type": "code",
+   "source": "HomotopyRules()"
+  },
+  {
+   "type": "text",
+   "source": "### Equivalent paths: a derivation\n\nOn a disk made of six triangles round a centre, going three steps along the rim is homotopic to going through the centre."
+  },
+  {
+   "type": "code",
+   "source": "d = TriangulatedDisk(6)\np = StepPath(d, [1, 2, 3, 4])\nq = StepPath(d, [1, 0, 4])\n[p, q]"
+  },
+  {
+   "type": "text",
+   "source": "The search finds a shortest derivation and plays it: each frame is one rewrite, the touched positions and the area used in amber, the target path in blue."
+  },
+  {
+   "type": "code",
+   "source": "HomotopyDerivation(p, q)"
+  },
+  {
+   "type": "code",
+   "source": "DerivationSteps(HomotopyDerivation(p, q))"
+  },
+  {
+   "type": "text",
+   "source": "The two ways round the rim are equivalent too, and the whole rim, a loop, contracts to a point: the disk has no hole."
+  },
+  {
+   "type": "code",
+   "source": "HomotopyDerivation(StepPath(d, [1, 2, 3, 4]), StepPath(d, [1, 6, 5, 4]))"
+  },
+  {
+   "type": "code",
+   "source": "HomotopyDerivation(StepPath(d, [1, 2, 3, 4, 5, 6, 1]), StepPath(d, [1]))"
+  },
+  {
+   "type": "text",
+   "source": "On the running example, the step $1 \\to 2$ and the detour $1 \\to 3 \\to 2$ are one rewrite apart, across the area $\\{1, 2, 3\\}$:"
+  },
+  {
+   "type": "code",
+   "source": "HomotopyDerivation(StepPath(h, [1, 2]), StepPath(h, [1, 3, 2]))"
+  },
+  {
+   "type": "text",
+   "source": "### Inequivalent paths: a barrier\n\nOn an annulus, a ring of triangles round a hole, the two ways from $a_1$ to $a_3$ pass on opposite sides of the hole."
+  },
+  {
+   "type": "code",
+   "source": "A = TriangulatedAnnulus(4)\nu = StepPath(A, [\"a1\", \"a2\", \"a3\"])\nw = StepPath(A, [\"a1\", \"a4\", \"a3\"])\n[u, w]"
+  },
+  {
+   "type": "text",
+   "source": "No search for a derivation can show that none exists; it only fails within its bounds:"
+  },
+  {
+   "type": "code",
+   "source": "HomotopyDerivation(u, w)"
+  },
+  {
+   "type": "text",
+   "source": "> **Definition** (barrier). A barrier is a set of pairs of adjacent positions such that every triple inside an area holds an even number of them: no area is crossed an odd number of times. The **crossing parity** of a path is the parity of its number of steps across the barrier.\n\n> **Claim** (barriers prove inequivalence). Every rewrite rule keeps the crossing parity of every barrier, so two paths whose crossing parities differ are not area-homotopic. *Argument:* cancel removes two crossings of one pair or none, a stall crosses nothing, and contract or expand trade $a\\,c\\,b$ for $a\\,b$, changing the count by the barrier pairs among $ab, ac, cb$: an even number inside an area. *Check:* 67641 rewrites of random paths against random barriers.\n\nA barrier is found by search and checked locally, area by area. This one runs from the hole to the outside; $u$ crosses it once and $w$ not at all (barrier pairs as amber bars):"
+  },
+  {
+   "type": "code",
+   "source": "FindBarrier(u, w)"
+  },
+  {
+   "type": "code",
+   "source": "[AreaHomotopicQ(u, w), AreaHomotopicQ(p, q)]"
+  },
+  {
+   "type": "text",
+   "source": "The running example has a hole too: the loop $2 \\to 6 \\to 4 \\to 3 \\to 2$ goes round it and cannot be contracted, though each hyperedge it passes is an area."
+  },
+  {
+   "type": "code",
+   "source": "FindBarrier(StepPath(h, [2, 6, 4, 3, 2]), StepPath(h, [2]))"
+  },
+  {
+   "type": "text",
+   "source": "### Shortening alone is not enough\n\n> **Claim** (shortening is not confluent). The shortening rules (cancel, stall, contract) always stop, but not always at the same path: on the disk, $5\\,0\\,4\\,5\\,0\\,3$ reduces to $5\\,0\\,3$ in one order and to $5\\,4\\,3$ in another. The two are homotopic, but only through an expansion. Deciding homotopy therefore needs the expanding rules, or a barrier. *Check:* exhaustive over all orders for random paths."
+  },
+  {
+   "type": "code",
+   "source": "ReducePath(StepPath(d, [5, 0, 4, 5, 0, 3]))"
+  },
+  {
+   "type": "code",
+   "source": "HomotopyDerivation(StepPath(d, [5, 0, 3]), StepPath(d, [5, 4, 3]))"
+  },
+  {
+   "type": "text",
+   "source": "### Motions: homotopy derived from areas\n\n> **Definition** (homotopy of motions). Two motions with the same ends are **homotopic** when their step paths are area-homotopic. A derivation of the step paths proves it; a barrier refutes it.\n\nA motion keeps the infinitesimal positions it passes; its homotopy forgets them. So the motion out through $\\{1, 2\\}$ and back through $\\{1, 2, 3\\}$, a loop of the incidence space that does not reduce, is homotopic to staying at $1$: its step path $1\\,2\\,1$ cancels at once, because the area $\\{1, 2, 3\\}$ fills the bigon between the two connections."
+  },
+  {
+   "type": "code",
+   "source": "loop = Motion(h, [1, [1, 2], 2, [1, 2, 3], 1])\n[HomotopicQ(loop, Motion(h, [1])), IncidenceHomotopicQ(loop, Motion(h, [1]))]"
+  },
+  {
+   "type": "code",
+   "source": "PathOfMotion(loop)"
+  },
+  {
+   "type": "code",
+   "source": "ReducePath(PathOfMotion(loop))"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (incidence homotopy refines homotopy). Motions with the same reduced form under backtrack cancellation $x\\,y\\,x \\to x$ (homotopic in $X(H)$, §2) are homotopic; not conversely. *Argument:* cancelling $v\\,e\\,v$ leaves a stall; cancelling $e\\,w\\,e$ in $v\\,e\\,w\\,e\\,u$ turns $v\\,w\\,u$ into $v\\,u$, a contract across $e$ (or a cancel or stall). *Check:* 2000 random motions.\n\n### The fundamental group\n\n> **Definition** (fundamental group). $\\pi_1(H, v)$ is the group of closed step paths at $v$ up to area homotopy. Choose a spanning tree of the adjacency graph: each step outside it is a generator (out along the tree, across, back along the tree), and each triangle inside an area is a relator $g_{ab}\\,g_{bc}\\,g_{ca}$. Tietze moves then simplify the presentation without changing the group.\n\nThe disk is simply connected; the annulus has one free loop; the running example's hole is one loop too:"
+  },
+  {
+   "type": "code",
+   "source": "FundamentalGroup(d, 1)"
+  },
+  {
+   "type": "code",
+   "source": "FundamentalGroup(A, \"a1\")"
+  },
+  {
+   "type": "code",
+   "source": "FundamentalGroup(h, 1)"
+  },
+  {
+   "type": "text",
+   "source": "The seven-point torus, seven vertices and fourteen triangles, gives the torus group: two loops that commute."
+  },
+  {
+   "type": "code",
+   "source": "FundamentalGroup(Torus7(), 0)"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (the edge-path group). The rules of area homotopy are the elementary equivalences of edge paths in the simplicial complex $K(H)$ whose simplices are the subsets of edges, so $\\pi_1(H, v)$ is the edge-path group of $K(H)$, that is $\\pi_1(|K(H)|, v)$, and the tree-and-triangles presentation presents it. Its abelianisation has rank $b_1(K(H)) \\le b_1(X(H))$. *Argument:* the edge-path group theorem (Spanier, *Algebraic Topology*, 3.6). *Check:* on 300 random spaces the abelianised rank equals $b_1(K(H))$ computed by linear algebra, and where the presentation simplifies to the trivial group, every generator loop contracts by a derivation.\n\n> **Note** (barriers and the group). A barrier is a mod-2 cocycle of $K(H)$: it detects a loop only through $H^1(K(H); \\mathbb{Z}/2)$. Going twice round the annulus is not contractible, yet crosses every barrier an even number of times. The presentation sees it; barriers do not."
+  },
+  {
+   "type": "text",
+   "source": "### Incidence homotopy: only backtracks cancel\n\nIn the incidence space, where hyperedges are not filled, motions are deformed only by cancelling backtracks: stepping into a point and straight back out is the same as staying. This finer relation stays available for motions that remember their infinitesimal positions.\n\n> **Definition** (incidence homotopy). Motions are rewritten by the single rule $x\\,y\\,x \\to x$. Two motions with the same ends are **incidence-homotopic** when they have the same normal form. The closed motions at $v$ up to incidence homotopy form the free group $\\pi_1(X(H), v)$ of §2.\n\n> **Claim** (confluence). The rule $x\\,y\\,x \\to x$ is terminating and confluent, so every motion has exactly one reduced form; and two motions are homotopic in $X(H)$ relative to their ends exactly when their reduced forms agree. *Argument:* the only critical pair $x\\,y\\,x\\,y$ resolves to $x\\,y$ both ways (free reduction); homotopy classes of paths in a graph are reduced walks. *Check:* 2000 random motions, every order of cancellation gives the same normal form.\n\nGoing to $5$ and coming back is homotopic to staying at $1$:"
+  },
+  {
+   "type": "code",
+   "source": "AnimateReduction(JoinMotions(g, ReverseMotion(g)))"
+  },
+  {
+   "type": "text",
+   "source": "Passing through the same infinitesimal position twice in a row is passing through it once:"
+  },
+  {
+   "type": "code",
+   "source": "ReduceMotion(Motion(h, [1, [1, 2, 3], 2, [1, 2, 3], 3]))"
+  },
+  {
+   "type": "text",
+   "source": "And the loop through the two parallel connections between $1$ and $2$ does not reduce: it is not incidence-homotopic to staying, though it is homotopic to staying (above)."
+  },
+  {
+   "type": "code",
+   "source": "loop = Motion(h, [1, [1, 2], 2, [1, 2, 3], 1])\n[ReduceMotion(loop) == loop, IncidenceHomotopicQ(loop, Motion(h, [1]))]"
+  },
+  {
+   "type": "text",
+   "source": "# 8. Motion as a rewriting system\n\nA moving point can be made literally a rewrite. Put a token in the hypergraph: at a position $x$ it hangs from $x$ by a directed edge $(t, x)$; inside an infinitesimal position $e$ it is one more vertex of $e$. Then each half-step is the application of a rule.\n\n> **Definition** (motion as rewriting). For each edge size $k$ there are two rules, a **departure**\n> $$\\{(t),\\ (t, x),\\ \\{x, y_2, \\dots, y_k\\}\\} \\;\\to\\; \\{(t),\\ \\{t, x, y_2, \\dots, y_k\\}\\}$$\n> and an **arrival**, its reverse. Their multiway evolution from one state follows every motion at once."
+  },
+  {
+   "type": "code",
+   "source": "t = SpatialHypergraph([[1, 2, 3], [3, 4], [4, 1]])"
+  },
+  {
+   "type": "code",
+   "source": "sys = TokenRewritingSystem(t, 1);\nMap(r => HypergraphRulePlot(r, VertexLabels = true), sys(\"Rules\"))"
+  },
+  {
+   "type": "text",
+   "source": "The rules come in pairs, departure then arrival, for edges of size $2$ and $3$. The token at $1$ has two ways to depart, one per edge through $1$; each is a rewrite event, drawn as its match highlighted beside its result. (The size-$3$ rule also matches the triangle with its other two vertices swapped, giving the same result twice; the states graph merges such duplicates.)"
+  },
+  {
+   "type": "code",
+   "source": "start = TokenState(t, 1)\n[HypergraphEventPlot(sys(\"Rules\")[1], start, VertexLabels = true)[1], HypergraphEventPlot(sys(\"Rules\")[3], start, VertexLabels = true)[1]]"
+  },
+  {
+   "type": "text",
+   "source": "The states graph merges states that are the same up to symmetry. Here swapping $1$ and $3$ (fixing $2$ and $4$) is a symmetry of the space, so the seven points of $X(t)$ fall into five states:"
+  },
+  {
+   "type": "code",
+   "source": "sys(\"StatesGraph\", 5)"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (states graph). The states graph of the token system started at $x$ is the motion graph (the component of $x$) divided by the symmetries of $H$: states are orbits of points, and one leads to another when some point of the first has a half-step to some point of the second. *Check:* states and transitions agree with orbits computed from all permutations, 40 random connected spaces."
+  },
+  {
+   "type": "text",
+   "source": "# 9. Fields as distributions of typed edges\n\n> **Choice** (2026-10-29). Field objects, such as functions and vector fields, are distributions of edges of different types. Definitions through maps are their map versions (Part III); the primitive notions are hypergraph constructions, and algebraic operations are replaced by rewriting processes.\n\n> **Choice** (2026-10-29). Vector fields point from vertices to edges and from edges to vertices. An edge-to-vertex vector is a negative direction. Fields in general may be distributions of edges of any types: it is the distribution of edges that defines a field.\n\n> **Definition** (vector field). A vector field of type $X$ is a finite multiset of typed arcs of the motion graph: **departures** $X(v \\rightharpoonup e)$ and **arrivals** $X(e \\rightharpoonup v)$, for $v \\in e$. An arrival is the opposite of the departure on the same incidence. A **step** $a \\to b$ of $X$ is a departure $a \\rightharpoonup e$ followed by an arrival $e \\rightharpoonup b$; a stationary step $a \\rightharpoonup \\{a\\} \\rightharpoonup a$ stays on a unary edge. The field is partial (it says nothing where it has no arcs), and several fields live together as one multiset of typed edges, the *state* that rules act on.\n\nOn a four-by-four grid with a unary edge at every point (so every point could stay), the field $X$ steps east and the field $Y$ steps north, wherever the grid allows. Each step is two arcs meeting at the star of the edge it passes:"
+  },
+  {
+   "type": "code",
+   "source": "sq = WithUnaryEdges(GridSpace(4, 4))\nX = DirectionField(sq, \"X\", [1, 0])"
+  },
+  {
+   "type": "code",
+   "source": "Y = DirectionField(sq, \"Y\", [0, 1])"
+  },
+  {
+   "type": "code",
+   "source": "JoinFields(X, Y)"
+  },
+  {
+   "type": "code",
+   "source": "Take(FieldEdges(X, \"X\"), 4)"
+  },
+  {
+   "type": "text",
+   "source": "A field can be given arc by arc too. Here one departure and one arrival make a step from $1$ to $2$ through the edge $\\{1, 2\\}$; the arcs are single and none leaves a point twice, so a flow can follow it:"
+  },
+  {
+   "type": "code",
+   "source": "V = VectorFieldArcs(sq, \"V\", [[1, [1, 2]], [[1, 2], 2]])\n[VectorFieldQ(V, \"V\"), DeterministicQ(V, \"V\")]"
+  },
+  {
+   "type": "text",
+   "source": "Space and fields together are one hypergraph: the edges of space unordered; each infinitesimal position the field touches is one more vertex, named by its edge; field arcs are directed and labelled by their type. Drawn here in the plain hypergraph style:"
+  },
+  {
+   "type": "code",
+   "source": "FieldHypergraph(V)"
+  },
+  {
+   "type": "text",
+   "source": "# 10. Negative directions cancel\n\nAn arrival $e \\rightharpoonup v$ is the negative of the departure $v \\rightharpoonup e$, so the two annihilate. This is a rewrite rule, not a subtraction.\n\n> **Definition** (cancellation). $X(v \\rightharpoonup e),\\ X(e \\rightharpoonup v) \\to \\varnothing$, for arcs of one type on one incidence. Its normal form is the **net** field: on each incidence, departures minus arrivals.\n\n> **Claim** (cancellation is confluent). The rule terminates and every order of application ends in the same multiset, the net field; a field and its reverse cancel to nothing, and so does a stationary step. *Argument:* each application lowers both counts on one incidence and touches nothing else. *Check:* 2000 random multisets of arcs, random orders.\n\nEast on the bottom row, one step west against it, and one stationary step: the step and its reverse cancel, and so does the stay."
+  },
+  {
+   "type": "code",
+   "source": "B = JoinFields(DirectionField(sq, \"B\", [1, 0], Where = (c => c[2] == -3)), VectorFieldEdges(sq, \"B\", {15: 14, 10: 10}))"
+  },
+  {
+   "type": "code",
+   "source": "Cancel(B)"
+  },
+  {
+   "type": "text",
+   "source": "> **Note** (zero and undefined). After cancellation, a stationary step, the zero vector at a point, is gone: the field is no longer defined there. Cancellation does not tell zero from undefined, and this matters for the bracket (§13)."
+  },
+  {
+   "type": "text",
+   "source": "# 11. Integration is transitive closure\n\nA flow is integrated not by solving an equation but by closing up under a rule. A departure and an arrival make a step; the closure rules collect the steps and extend them by one more step:\n\n> **Definition** (closure, integration). $X(a \\rightharpoonup e),\\ X(e \\rightharpoonup b) \\Rightarrow X^{+}(a \\to b)$ and $X^{+}(a \\to b),\\ X(b \\rightharpoonup e),\\ X(e \\rightharpoonup c) \\Rightarrow X^{+}(a \\to c)$. **Saturation** applies the rules everywhere, round after round, until nothing new appears; what it adds is added once."
+  },
+  {
+   "type": "code",
+   "source": "ClosureRules(\"X\")"
+  },
+  {
+   "type": "text",
+   "source": "Saturating $X$ round by round: each round is one more unit of time, the edges it adds in amber."
+  },
+  {
+   "type": "code",
+   "source": "AnimateSaturation(X, ClosureRules(\"X\"), Types = [\"X+\"])"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (closure is integration). $X^{+}(a \\to b)$ appears exactly when $b$ is reached from $a$ by one or more steps of $X$, and round $k$ adds exactly the points first reached at time $k$. *Argument:* induction on rounds. *Check:* 500 random partial fields on random spaces, each step through a random smallest edge.\n\nA field defined on part of space integrates only there. East on the top two rows only:"
+  },
+  {
+   "type": "code",
+   "source": "Xtop = DirectionField(sq, \"Xtop\", [1, 0], Where = (c => c[2] >= -1))\nSaturate(Xtop, ClosureRules(\"Xtop\"))"
+  },
+  {
+   "type": "text",
+   "source": "# 12. Composition is a rewrite rule\n\nDerivations compose because they are defined everywhere. Partial, finitary fields compose where their edges meet, and nowhere else:\n\n> **Definition** (composition). For vector fields $X$ and $Y$, from a step of $X$ from $a$ to $b$ and a step of $Y$ from $b$ to $c$, that is the chain $X(a \\rightharpoonup e_1), X(e_1 \\rightharpoonup b), Y(b \\rightharpoonup e_2), Y(e_2 \\rightharpoonup c)$, add $(X;Y)(a \\to c)$: first the flow of $X$, then that of $Y$. A transitive closure across two types."
+  },
+  {
+   "type": "code",
+   "source": "CompositionRule(\"X\", \"Y\")"
+  },
+  {
+   "type": "code",
+   "source": "XY = Saturate(JoinFields(X, Y), CompositionRule(\"X\", \"Y\"))\nShowFields(XY, [\"X;Y\"])"
+  },
+  {
+   "type": "text",
+   "source": "A composite of two infinitesimal motions is not infinitesimal: its ends lie four half-steps apart in the motion graph. The **order** of an edge counts its half-steps: $1$ for an arc, $2$ for a step."
+  },
+  {
+   "type": "code",
+   "source": "[EdgeOrder(XY, FieldEdges(XY, \"X\")[1]), EdgeOrder(XY, FieldEdges(XY, \"X;Y\")[1])]"
+  },
+  {
+   "type": "text",
+   "source": "# 13. The bracket closes squares\n\nThe Lie bracket measures how far two flows fail to commute. Here it is the rule that closes the square of the two orders of flowing.\n\n> **Definition** (bracket). Compose both ways, then from $(X;Y)(a \\to c)$ and $(Y;X)(a \\to c')$ with $c \\neq c'$ add the step $c' \\to c$ of type $[X, Y]$, as the departure $c' \\rightharpoonup e$ and the arrival $e \\rightharpoonup c$ through the smallest edge $e$ holding both. If $c'$ and $c$ are not adjacent the rule adds one edge $c' \\to c$ of higher order instead. Where $c = c'$ the square closes and nothing is added: the fields commute at $a$. Where a composite is missing, the bracket is not defined there.\n\n> **Choice** (Claude, 2026-10-29, at your word \"as is most natural\"). The bracket points from the end of $Y;X$ to the end of $X;Y$, the classical orientation: flowing $s$ along $X$ then $t$ along $Y$ ends $st\\,[X, Y]$ past flowing along $Y$ first, with $[X, Y] = X(Y) - Y(X)$. When the two ends are adjacent the bracket is a step, a departure and an arrival, so the bracket is again a vector field of the same kind. When they lie further apart it is kept as an edge of higher order."
+  },
+  {
+   "type": "code",
+   "source": "BracketRules(\"X\", \"Y\")"
+  },
+  {
+   "type": "text",
+   "source": "East and north commute: wherever both composites exist they end at the same point, and the bracket has no edges."
+  },
+  {
+   "type": "code",
+   "source": "b0 = Saturate(JoinFields(X, Y), BracketRules(\"X\", \"Y\"))"
+  },
+  {
+   "type": "code",
+   "source": "ShowFields(b0, [\"X;Y\", \"Y;X\"])"
+  },
+  {
+   "type": "code",
+   "source": "Length(FieldEdges(b0, \"[X,Y]\"))"
+  },
+  {
+   "type": "text",
+   "source": "Now let $Z$ step north on the even columns and stay put on the odd ones. The two orders now disagree on every square of the grid, by one step:"
+  },
+  {
+   "type": "code",
+   "source": "Z = DirectionField(sq, \"Z\", [0, 1], Where = (c => EvenQ(c[1])), Stay = true)"
+  },
+  {
+   "type": "code",
+   "source": "AnimateSaturation(JoinFields(X, Z), BracketRules(\"X\", \"Z\"))"
+  },
+  {
+   "type": "code",
+   "source": "bz = Saturate(JoinFields(X, Z), BracketRules(\"X\", \"Z\"))\nShowFields(bz, [\"[X,Z]\"])"
+  },
+  {
+   "type": "code",
+   "source": "[Length(FieldEdges(bz, \"[X,Z]\")), VectorFieldQ(bz, \"[X,Z]\")]"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (brackets on the grid). East and north have no bracket edges. With $Z$ as above, the bracket is a partial vector field of single vertical steps, one per unit square: $(m-1)(n-1)$ steps, $2(m-1)(n-1)$ arcs, on an $m \\times n$ grid. The steps point south where the square starts on an even column and north where it starts on an odd one, as $[\\partial_x, \\varphi(x)\\,\\partial_y] = \\varphi'(x)\\,\\partial_y$ would have it. *Check:* grids up to $7 \\times 7$.\n\nPartiality is kept: a field defined on the left half only has a bracket with $X$ only on the squares where both orders of flowing are defined."
+  },
+  {
+   "type": "code",
+   "source": "W = DirectionField(sq, \"W\", [0, 1], Where = (c => c[1] <= 1 and EvenQ(c[1])), Stay = true)\nShowFields(Saturate(JoinFields(X, W), BracketRules(\"X\", \"W\")), [\"W\", \"[X,W]\"])"
+  },
+  {
+   "type": "text",
+   "source": "Antisymmetry comes for free: the bracket rule with the roles exchanged adds the same steps reversed, each arc replaced by its opposite."
+  },
+  {
+   "type": "code",
+   "source": "zx = Saturate(JoinFields(X, Z), BracketRules(\"Z\", \"X\"))\nShowFields(zx, [\"[Z,X]\"])"
+  },
+  {
+   "type": "text",
+   "source": "Cancelling first changes everything. The stays of $Z$ on the odd columns are what make $X;Z$ and $Z;X$ defined there. Cancelled, they leave $Z$ undefined on the odd columns, and the bracket has no edges at all:"
+  },
+  {
+   "type": "code",
+   "source": "Zc = CancelledFields(Cancel(Z))\nLength(FieldEdges(Saturate(JoinFields(X, Zc), BracketRules(\"X\", \"Z\")), \"[X,Z]\"))"
+  },
+  {
+   "type": "text",
+   "source": "> **Question** (zero or undefined). Should a stationary step count as a defined zero vector, kept apart from \"no arc here\"? If so, cancellation must not remove it (for example, the rule applies only to arcs of different steps). Or does saturation always run before cancellation? The answer decides whether brackets are computed from the net field or from the arcs as given."
+  },
+  {
+   "type": "text",
+   "source": "# 14. Scalar fields by multiplicity\n\n> **Choice** (2026-10-29). A scalar field is inferred from multiplicities of unary edges: that is the main understanding of a scalar field. Its value is something inferred, not given.\n\n> **Definition** (scalar field). A scalar field of type $f$ is a multiset of unary edges $f(v)$ on the vertices; its value at $v$ is their multiplicity $|f|_v$, zero where there are none. The unary edges are drawn as concentric disks, one per copy."
+  },
+  {
+   "type": "code",
+   "source": "G = GridSpace(3, 3)\nf = ScalarField(G, \"f\", {1: 1, 2: 3, 3: 2, 5: 2, 6: 4, 9: 1})"
+  },
+  {
+   "type": "code",
+   "source": "FieldValues(f, \"f\")"
+  },
+  {
+   "type": "text",
+   "source": "Values are compared by rewriting, not by subtracting numbers:\n\n> **Definition** (comparison). The rule $f(a),\\ f(b) \\to \\varnothing$, on working copies of the unary edges at $a$ and $b$, pairs them off until one side runs out. What is left is the difference, at the higher end. Along a step $a \\to b$ this is the **derivative**: $\\uparrow$, $\\circ$ or $\\downarrow$, with its size."
+  },
+  {
+   "type": "code",
+   "source": "k = CompareValues(f, \"f\", 5, 6)"
+  },
+  {
+   "type": "code",
+   "source": "[ComparisonSign(k), ComparisonSize(k)]"
+  },
+  {
+   "type": "text",
+   "source": "A scalar function in the map version (Part III) gives a scalar field: $f(v) - \\min f$ copies at each $v$. The distance from a corner:"
+  },
+  {
+   "type": "code",
+   "source": "ScalarFieldOf(DistanceFunction(G, 1), \"d\")"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (scalar fields and their map versions). A multiset of unary edges is the edge version of a scalar function $H \\to \\mathcal{L}$ (tight edge values, up to a shift) exactly when on every edge its multiplicities lie within one step of each other. Then the derivative of the map version along a departure $a \\rightharpoonup e$ is $\\uparrow$ ($\\downarrow$) exactly when comparing $a$ with some other vertex of $e$ leaves unary edges there (at $a$), and $\\circ$ when every comparison balances. *Argument:* a map to the line sends each edge into $\\{n\\}$ or $\\{n, n+1\\}$. *Check:* 674 scalar fields on 300 random spaces.\n\nSo scalar fields are more general than their map versions: $f$ above rises by two from $1$ to $2$, which no map to the scalar line does along one edge.\n\n> **Proposal** (gradient). The surplus that a comparison leaves is a natural vector field: $k$ copies of the step from the lower to the higher end, a departure and an arrival each. Along binary edges this is unambiguous. Through a hyperedge, which pairs of its vertices it should connect is yours to decide."
+  },
+  {
+   "type": "text",
+   "source": "# Part III · Map versions\n\nThe notions below are defined through maps of hypergraphs. They remain valid as the *map versions* of Part II's primitive notions and as checks on them."
+  },
+  {
+   "type": "text",
+   "source": "# 15. Maps and their differentials\n\n> **Definition** (map). A map $f: H \\to H'$ sends positions to positions and each edge to an edge or, collapsing it, to a position, keeping incidence: $f(v) \\in f(e)$ when $f(e)$ is an edge, $f(v) = f(e)$ when the edge **collapses**. The edge part is data: an edge whose positions all go to $u$ may collapse to $u$, or go to $\\{u\\}$ or to any edge through $u$.\n\n> **Choice** (2026-10-28, 2026-10-29). Maps are understood within the same hypergraphic context: vertices and edges are mapped together. Collapsing maps are allowed.\n\n> **Claim** (maps are continuous). The maps $H \\to H'$ are exactly the continuous maps $X(H) \\to X(H')$ that send positions to positions; those without collapses also send infinitesimal positions to infinitesimal positions. *Check:* all 23307 such functions between 150 pairs of small spaces.\n\n> **Definition** (pushforward). $f_*(v \\rightharpoonup e) = f(v) \\rightharpoonup f(e)$, a tangent vector; where $e$ collapses, the departure goes to the point $f(v)$ itself (the motion pauses). $f$ is an **immersion** when $f_*$ is injective at every position, a **submersion** when it is onto, a **local isomorphism** when both, and an **embedding** when it is injective and $f(v) \\in f(e)$ only if $v \\in e$.\n\nThe six-cycle wrapping twice round the three-cycle is a local isomorphism (a covering):"
+  },
+  {
+   "type": "code",
+   "source": "cover = SpatialMap(CycleSpace(6), CycleSpace(3), {0: 0, 1: 1, 2: 2, 3: 0, 4: 1, 5: 2})"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(MapPlot(cover, v), [v, Positions(CycleSpace(6))])"
+  },
+  {
+   "type": "text",
+   "source": "Folding the three binary edges of a triangle onto one hyperedge is onto at every position but not injective: the two directions at $0$ become one."
+  },
+  {
+   "type": "code",
+   "source": "fold = SpatialMap(CycleSpace(3), SpatialHypergraph([[0, 1, 2]]), {0: 0, 1: 1, 2: 2})"
+  },
+  {
+   "type": "code",
+   "source": "MapPlot(fold, 0)"
+  },
+  {
+   "type": "text",
+   "source": "Sending one edge into a hyperedge is an embedding: an edge drawn inside a two-cell."
+  },
+  {
+   "type": "code",
+   "source": "SpatialMap(PathSpace(1), SpatialHypergraph([[0, 1, 2]]), {0: 0, 1: 1})"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (chain rule). $(g \\circ f)_* = g_* \\circ f_*$, identities push forward to identities, and maps carry motions to motions. An embedding is exactly a homeomorphism of $X(H)$ onto its image. *Check:* all maps between small spaces."
+  },
+  {
+   "type": "code",
+   "source": "twice = ComposeMaps(CurveOfMotion(Motion(CycleSpace(6), [0, [0, 1], 1, [1, 2], 2])), cover)"
+  },
+  {
+   "type": "text",
+   "source": "### Collapsing\n\nSquashing the second edge of a path onto its end: the departure into the collapsed edge goes to a point, and a motion through it pauses there."
+  },
+  {
+   "type": "code",
+   "source": "squash = SpatialMap(PathSpace(2), PathSpace(1), {0: 0, 1: 1, 2: 1}, [[1, 2] -> 1])"
+  },
+  {
+   "type": "code",
+   "source": "[Pushforward(squash, Departure(1, [1, 2])), Pushforward(squash, Departure(1, [0, 1]))]"
+  },
+  {
+   "type": "code",
+   "source": "PushMotion(squash, Motion(PathSpace(2), [0, [0, 1], 1, [1, 2], 2]))"
+  },
+  {
+   "type": "text",
+   "source": "# 16. Scalar functions\n\nA function is not an assignment of numbers. This section gives its **map version**: as in the continuum, where a function is a map to a one-dimensional non-compact manifold, here it is a map to a path.\n\n> **Choice** (2026-10-29). Field objects, such as functions and vector fields, are *distributions of edges of different types*. Definitions through maps, as in this section and the next, are the map versions of these notions; the primitive notions are hypergraph constructions, and algebraic operations are replaced by rewriting processes. Part II builds vector fields that way (§15).\n\n> **Choice** (2026-10-28). Functions are transformations or formal correspondences: assignments of edges and vertices to edges and vertices, for instance of a path graph. Real numbers are not used except in side directions.\n\n> **Definition** (scalar line). The scalar line $\\mathcal{L}$ is the path on $\\mathbb{Z}$ with the edges $\\{n, n+1\\}$ and, at every point, the unary edge $\\{n\\}$. At each point it has exactly three tangent vectors: $\\downarrow = n \\rightharpoonup \\{n-1, n\\}$, $\\circ = n \\rightharpoonup \\{n\\}$ and $\\uparrow = n \\rightharpoonup \\{n, n+1\\}$. (The integers only name its points.)"
+  },
+  {
+   "type": "code",
+   "source": "ScalarLine(0, 4)"
+  },
+  {
+   "type": "text",
+   "source": "> **Definition** (scalar function). A scalar function is a map $f: H \\to \\mathcal{L}$. Each position gets a point $f(v)$ and each infinitesimal position an edge $f(e)$ containing the values of its vertices. So the values on one edge lie within one step of each other, and where $f$ is constant on an edge its value there is $\\{n\\}$ (*stationary*) or $\\{n-1, n\\}$ / $\\{n, n+1\\}$ (an *infinitesimal* dip or rise, invisible at the positions). The **derivative** along $v \\rightharpoonup e$ is the pushforward, one of $\\downarrow, \\circ, \\uparrow$.\n\n> **Note.** In this map version the unary edges of the scalar line give the stationary direction. The primitive version of a scalar field, a multiset of unary edges whose multiplicities are its values, is §14.\n\nThe distance from a point is a scalar function. Drawn as a level picture, each position sits at the height of its value and each edge's star at the height of its value (half a level up for $\\{n, n+1\\}$); the scalar line is on the left."
+  },
+  {
+   "type": "code",
+   "source": "f = DistanceFunction(h, 1)"
+  },
+  {
+   "type": "code",
+   "source": "Differential(f, 2)"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(ScalarPlot(f, v), [v, Positions(h)])"
+  },
+  {
+   "type": "text",
+   "source": "> **Definition** (critical points). A position is **regular** when both $\\uparrow$ and $\\downarrow$ occur among its derivatives, a **local maximum** when $\\downarrow$ occurs but $\\uparrow$ does not, a **local minimum** dually, and **flat** when only $\\circ$ occurs."
+  },
+  {
+   "type": "code",
+   "source": "CriticalPoints(f)"
+  },
+  {
+   "type": "text",
+   "source": "The edge values carry information the positions do not. On a path where every position has value $0$, sending the middle edge $\\{1, 2\\}$ to $\\{0, 1\\}$ makes an infinitesimal bump: both of its ends become local minima, while the outer points stay flat."
+  },
+  {
+   "type": "code",
+   "source": "bump = ScalarFunction(PathSpace(3), [0, 0, 0, 0], EdgeValues = [[1, 2] -> [0, 1]])"
+  },
+  {
+   "type": "code",
+   "source": "Map(v => PointKind(bump, v), Positions(PathSpace(3)))"
+  },
+  {
+   "type": "text",
+   "source": "Continuity is not assumed but forced: vertex values that jump by two across an edge do not define a map."
+  },
+  {
+   "type": "code",
+   "source": "ScalarFunction(PathSpace(1), {0: 0, 1: 2})",
+   "expect": "error"
+  },
+  {
+   "type": "text",
+   "source": "### Level sets and the infinitesimal level between two values\n\n> **Definition** (level sets). $f^{-1}(n)$ holds the positions at $n$ and the edges sent to $\\{n\\}$: a closed subspace. $f^{-1}(\\{n, n+1\\})$, the **crossing** at the infinitesimal position between $n$ and $n+1$, holds the edges sent there: an open set made only of infinitesimal positions.\n\nFor the distance function the level sets are the spheres about $1$:"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(ScalarPlot(f, LevelSet(f, n)), [n, 0, 3])"
+  },
+  {
+   "type": "code",
+   "source": "Manipulate(ScalarPlot(f, Crossing(f, n)), [n, 0, 2])"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (crossings separate). Removing the crossing $f^{-1}(\\{n, n+1\\})$ from $X(H)$ separates the points where $f \\le n$ from those where $f \\ge n+1$. *Argument:* push a motion forward; in $\\mathcal{L}$ the only point joining the two sides is the edge $\\{n, n+1\\}$. *Check:* every level of 300 random scalar functions with random edge values.\n\n> **Claim** (the fundamental theorem). For a motion $\\gamma$ from $a$ to $b$, the pushforward $f_*\\gamma$ is a motion in $\\mathcal{L}$ from $f(a)$ to $f(b)$: integrating the derivatives along $\\gamma$ is walking the scalar line."
+  },
+  {
+   "type": "code",
+   "source": "PushMotion(f, g)"
+  },
+  {
+   "type": "text",
+   "source": "# 17. Vector fields and flows\n\nThese are the map versions: a field as a choice at each point and a rule for leaving each edge. The primitive version, a vector field of departures and arrivals with integration as closure, is §15–§19; the rewrite rules of flows proper will be specified by you.\n\n> **Definition** (vector field). A vector field chooses a tangent vector $X(v) = v \\rightharpoonup e$ at some positions. It can rest at $v$ only if $\\{v\\}$ is an edge.\n\nTo integrate a field one must also come out of the infinitesimal position one entered.\n\n> **Definition** (transit, flow, integral curve). A **transit** says, for each edge $e$ and each vertex $v \\in e$ entering it, by which vertex $\\tau_e(v) \\in e$ to leave; an **exit field** leaves each edge by one vertex whatever entered. The **flow** of $(X, \\tau)$ is one step $v \\to X(v) \\to \\tau_{X(v)}(v)$, and the **integral curve** from $v$ repeats it until the field ends, rests, or closes up.\n\nA rotation of the four-cycle, every point carried at once:"
+  },
+  {
+   "type": "code",
+   "source": "c4 = CycleSpace(4)\nspin = Flow(VectorField(c4, {0: [0, 1], 1: [1, 2], 2: [2, 3], 3: [3, 0]}), ExitField(c4, [[0, 1] -> 1, [1, 2] -> 2, [2, 3] -> 3, [3, 0] -> 0]))"
+  },
+  {
+   "type": "code",
+   "source": "AnimateFlow(spin, 4)"
+  },
+  {
+   "type": "text",
+   "source": "The gradient flow of a scalar function departs along an edge going up (down) and leaves it at its highest (lowest) vertex. Descending the distance from $1$:"
+  },
+  {
+   "type": "code",
+   "source": "down = GradientFlow(f, Ascending = false)"
+  },
+  {
+   "type": "code",
+   "source": "AnimateFlow(down, 3)"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (geodesics are gradient lines of distance). Every integral curve of the descending gradient flow of $d(v, \\cdot)$ is a geodesic ending at $v$. *Argument:* from $w \\neq v$ some edge holds $w$ and a position one step closer; leaving at the lowest vertex lowers the distance by one per step. *Check:* every point of 300 random connected spaces."
+  },
+  {
+   "type": "code",
+   "source": "[IntegralCurve(down, 5), HalfSteps(IntegralCurve(down, 5)) == HalfSteps(Geodesic(h, 5, 1))]"
+  },
+  {
+   "type": "text",
+   "source": "> **Proposal** (connection). A rule at each position saying which departures may follow which arrivals, $\\Gamma_v \\subseteq T_vH \\times T_vH$, would give *straight* motions (those obeying it), holonomy along closed motions and curvature as holonomy round small loops. Not built yet.\n\n> **Proposal** (hypermap structure). Cyclic orders on each star and on each edge are two permutations of $TH$: a hypermap, which records an embedding in a surface, and with it orientation and faces. Not built yet."
+  },
+  {
+   "type": "text",
+   "source": "# 18. Local models and charts: towards manifolds\n\nA manifold looks everywhere like one model. Here \"looks like\" is isomorphism of pointed balls.\n\n> **Definition** (pointed ball, chart, local model). The pointed ball $(B_r(v), v)$ is the subspace induced on $B_r(v)$ with centre $v$. A **chart** at $v$ is an isomorphism of pointed balls $(B_r(v), v) \\to (B_r(m), m)$ onto a ball of a model space $M$. $H$ is **locally modelled** on $M$ at radius $r$ when it has a chart at every point; the charts form an **atlas**.\n\nThe six-by-six torus grid, one of its pointed balls, and a chart onto the square grid:"
+  },
+  {
+   "type": "code",
+   "source": "T = TorusGrid(6, 6)"
+  },
+  {
+   "type": "code",
+   "source": "PointedBall(T, 1, 2)"
+  },
+  {
+   "type": "code",
+   "source": "Chart(T, 1, GridSpace(11, 11), [61], 2)"
+  },
+  {
+   "type": "code",
+   "source": "plane = GridSpace(11, 11)\n[LocallyModelledQ(TorusGrid(6, 6), plane, [61], 2), LocallyModelledQ(TorusGrid(5, 6), plane, [61], 2), LocallyModelledQ(KleinGrid(6, 6), plane, [61], 2)]"
+  },
+  {
+   "type": "text",
+   "source": "> **Claim** (closed grids are locally planar). The torus grid $C_m \\times C_n$ is locally modelled on $\\mathbb{Z}^2$ at radius $r$ exactly when $m, n \\ge 2r + 2$; the Klein-bottle grid is too for $m, n \\ge 2r + 2$ (and at a few smaller sizes). *Check:* $r = 1, 2$ and $3 \\le m, n \\le 9$. Local models at a fixed radius do not see orientation: telling the torus from the Klein bottle needs global structure, such as the hypermap proposal above.\n\n> **Definition** (combinatorial surface). A space whose edges are triangles is a combinatorial surface when the link of every point is a cycle. The octahedron is a sphere; the seven-point torus is a torus in which every two points share a triangle."
+  },
+  {
+   "type": "code",
+   "source": "Torus7()"
+  },
+  {
+   "type": "code",
+   "source": "[CombinatorialSurfaceQ(Octahedron()), CombinatorialSurfaceQ(Torus7()), CombinatorialSurfaceQ(h)]"
+  },
+  {
+   "type": "code",
+   "source": "Link(Torus7(), 0)"
+  },
+  {
+   "type": "text",
+   "source": "Atlases, transition maps and the choice of model spaces are the subject of the theme *hypergraph-atlases*."
+  },
+  {
+   "type": "text",
+   "source": "# 19. Where things stand\n\n## Settled by you\n\n| choice | date |\n|---|---|\n| space is an undirected simple hypergraph; vertices are points, edges connectivity | 2026-10-27 |\n| a tangent vector is a departure vertex → edge; motions alternate vertex → edge → vertex | 2026-10-27 |\n| C1: the topology is the incidence space; hyperedges serve as infinitesimal positions | 2026-10-28 |\n| C2: unary edges are allowed; they are how scalar functions are characterised | 2026-10-28 |\n| C3: maps send vertices and edges together | 2026-10-28 |\n| C4: functions are maps (to a path), not assignments of numbers | 2026-10-28 |\n| C5: the linear tangent space is a device at most; constructions rest on discrete rewriting | 2026-10-28 |\n| fields are distributions of edges of different types; map definitions are their map versions | 2026-10-29 |\n| collapsing maps are allowed; flow rules and a model-space taxonomy come later | 2026-10-29 |\n| algebra is replaced by rewriting: composition of flows is a rule like transitive closure for tangent edges | 2026-10-29 |\n| homotopy is deformation of path edges across higher-arity edges, by a rewrite rule that drives path equivalence | 2026-10-29 |\n| vector fields point vertex → edge and edge → vertex; an arrival is a negative direction | 2026-10-29 |\n| area homotopy is primary; the homotopy of motions is derived from it | 2026-10-29 |\n| the bracket's form: \"as is most natural\" (Claude chose the classical orientation, §13) | 2026-10-29 |\n| a scalar field is inferred from multiplicities of unary edges; fields are distributions of edges | 2026-10-29 |\n\n## Claims and their status\n\nAll are registered as *supported* (informal argument and computer check); none is marked proved until you accept the argument.\n\n| claim | evidence |\n|---|---|\n| closed sets of $X(H)$ are sub-hypergraphs; subspaces are traces | argument; brute force |\n| $X(H)$ has the homotopy type of the incidence graph | McCord (1966) |\n| backtrack rewriting of motions is confluent | argument; 2000 motions |\n| barriers prove area-inequivalence (crossing parity is invariant) | argument; 67641 rewrites |\n| incidence homotopy refines homotopy of motions | argument; 2000 motions |\n| shortening rules alone are not confluent | counterexample on the disk |\n| $\\pi_1(H, v)$ by area homotopy is the edge-path group of $K(H)$ | Spanier 3.6; 300 spaces |\n| cancellation is confluent; its normal form is the net field | argument; 2000 multisets |\n| closure of a vector field is its integrated flow, round $k$ = time $k$ | argument; 500 fields |\n| east and north commute; the alternating field's bracket is one step per square | argument; grids to $7 \\times 7$ |\n| scalar fields within one step on edges are exactly the map versions; comparison gives the derivative | argument; 674 fields |\n| token states graph = motion graph modulo symmetry | argument; 40 spaces |\n| maps (collapses allowed) = continuous maps keeping vertices; embeddings are topological | argument; 23307 functions |\n| distance is a scalar function; its gradient lines are geodesics; crossings separate | argument; 300 spaces |\n| closed grids are locally planar for $m, n \\ge 2r + 2$ | computation |\n\n## Questions for you\n\n> **Question** (zero or undefined, §10 and §13). Cancellation removes a stationary step, so the zero vector becomes \"undefined\", and brackets computed after cancelling lose every edge that the stays made possible. Should a stationary step be kept as a defined zero (cancellation applying only to opposite arcs of different steps), or is the order \"saturate, then cancel\" the rule?\n\n> **Question** (multiplicities of derived edges). Saturation adds each derived edge once. For distributions with multiplicities, a composite could instead carry the number of chains that produce it (two copies of $X$ composed with three of $Y$ giving six of $X;Y$). Which reading do you want?\n\n## Proposed next steps\n\n1. The gradient of a scalar field as the vector field of comparison surpluses (§14), and its integration by closure.\n2. Flows of brackets and the Jacobi identity, as properties of saturating three fields."
+  }
+ ]
+}

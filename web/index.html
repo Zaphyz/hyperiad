@@ -1,0 +1,72 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hyperiad Notebook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Literata:opsz,wght@7..72,400;7..72,600&family=Public+Sans:wght@400;500;600&display=swap">
+<style>/*STYLE*/</style>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]], displayMath: [["$$", "$$"]] },
+    svg: { fontCache: "global" },
+    options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] },
+    startup: { typeset: false },
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" defer></script>
+
+<header class="bar">
+  <div class="bar-inner">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path class="mark-edge" d="M8 30 C 6 18, 16 6, 22 9 C 30 12, 36 22, 31 30 C 26 36, 12 37, 8 30 Z"/>
+        <circle class="mark-v" cx="12" cy="28" r="3.2"/>
+        <circle class="mark-v" cx="21" cy="13" r="3.2"/>
+        <circle class="mark-v" cx="29" cy="27" r="3.2"/>
+      </svg>
+      <span class="wordmark">Hyperiad</span>
+      <span class="nb-title" id="nb-title"></span>
+    </div>
+    <div class="kernel" id="kernel-status" role="status" aria-live="polite">
+      <span class="dot" data-state="loading"></span><span id="kernel-text">Starting the browser kernel…</span>
+    </div>
+    <nav class="actions" aria-label="Notebook">
+      <button id="btn-toc" type="button" hidden aria-expanded="false" aria-controls="toc">Contents</button>
+      <button id="btn-run-all" type="button" title="Run every code cell in order">Run all</button>
+      <button id="btn-add-code" type="button" title="Add a code cell at the end">+ Code</button>
+      <button id="btn-add-text" type="button" title="Add a text cell at the end">+ Text</button>
+      <button id="btn-clear" type="button" title="Clear every output">Clear outputs</button>
+      <button id="btn-reference" type="button" aria-expanded="false" aria-controls="reference">Reference</button>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="toc" class="toc" hidden aria-label="Contents"></nav>
+  <main id="notebook" class="notebook" aria-label="Notebook cells"></main>
+  <aside id="reference" class="reference" hidden aria-label="Reference">
+    <div class="ref-head">
+      <h2>Reference</h2>
+      <input id="ref-search" type="search" placeholder="Search builtins" aria-label="Search builtins">
+    </div>
+    <ul id="ref-list" class="ref-list"></ul>
+    <section class="ref-keys">
+      <h3>Keys</h3>
+      <dl>
+        <dt>Shift + Enter</dt><dd>run, then move to the next cell</dd>
+        <dt>Ctrl/⌘ + Enter</dt><dd>run and stay</dd>
+        <dt>Alt + Enter</dt><dd>run and insert a cell below</dd>
+        <dt>Esc</dt><dd>leave the editor</dd>
+      </dl>
+    </section>
+  </aside>
+</div>
+
+<footer class="foot">
+  <span id="foot-text">Hyperiad 0.1 · computations run in your browser; large ones are estimated before they run.</span>
+</footer>
+
+<script>window.HYPERIAD_CONFIG = /*CONFIG*/{};</script>
+<script>window.HYPERIAD_NOTEBOOK = /*NOTEBOOK*/null;</script>
+<script>/*APP*/</script>

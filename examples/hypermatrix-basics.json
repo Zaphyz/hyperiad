@@ -1,0 +1,225 @@
+{
+ "title": "Hyperiad: arrays and hypergraphs",
+ "cells": [
+  {
+   "type": "text",
+   "source": "# Arrays and hypergraphs\n\nArrays of any order, their contraction by index specification, hypergraphs, and pictures of all of them. Run a cell with **Shift + Enter**; edit anything and run it again."
+  },
+  {
+   "type": "code",
+   "source": "m = [[1, 2], [3, 4]]\nArrayMultiply([m, m], \"ij,jk->ik\")"
+  },
+  {
+   "type": "text",
+   "source": "## One operation, many products\n\nAn index specification names the indices of each array; repeated indices are summed. The outer product of two vectors keeps both indices:"
+  },
+  {
+   "type": "code",
+   "source": "ArrayMultiply([[1, 2, 3], [10, 20]], \"i,j->ij\")"
+  },
+  {
+   "type": "text",
+   "source": "A trace contracts every index, leaving an array of order $0$. Without `->`, the indices that occur once survive, in sorted order."
+  },
+  {
+   "type": "code",
+   "source": "ArrayMultiply([m], \"ii->\")"
+  },
+  {
+   "type": "text",
+   "source": "## Special arrays and symmetry\n\n`IdentityArray(n, d)` is $1$ where all $n$ indices agree. At order $3$ it is drawn as a row of matrices, the first index choosing the matrix."
+  },
+  {
+   "type": "code",
+   "source": "IdentityArray(3, 2)"
+  },
+  {
+   "type": "text",
+   "source": "A declared symmetry is checked against the entries. In a symbolic array, index tuples that the symmetry makes equivalent name one entry:"
+  },
+  {
+   "type": "code",
+   "source": "GenerateSymbolicArray(a, [3, 3], \"Symmetric\")"
+  },
+  {
+   "type": "text",
+   "source": "## The fish product\n\nThe ternary products of *Heaps of Fish* (arXiv:2205.05456) are contractions of three $3$-arrays. One entry of the fish product $\\sum_{q,r,s} x_{ijq}\\, y_{rsq}\\, z_{rsk}$:"
+  },
+  {
+   "type": "code",
+   "source": "x = GenerateSymbolicArray(\"x\", [2, 2, 2])\ny = GenerateSymbolicArray(\"y\", [2, 2, 2])\nz = GenerateSymbolicArray(\"z\", [2, 2, 2])\nfish = ArrayMultiply([x, y, z], \"ijp,qrp,qrk->ijk\")\nfish[1, 1, 1]"
+  },
+  {
+   "type": "text",
+   "source": "## Definitions and their sources\n\nEvery definition lives in the research registry, with the reference implementation and paper it comes from."
+  },
+  {
+   "type": "code",
+   "source": "Concept(\"hypermatrix.array_multiply\")"
+  },
+  {
+   "type": "text",
+   "source": "## Large computations\n\nEach contraction is estimated before it runs. This one is over the browser's budget, so it is refused before any work is done; a Hyperiad server can run it."
+  },
+  {
+   "type": "code",
+   "source": "big = OneArray(3, 120)\nArrayMultiply([big, big], \"ijk,jkl->il\")"
+  },
+  {
+   "type": "text",
+   "source": "## Hypergraphs\n\nA hypergraph is a multiset of hyperedges. Each edge lists its vertices and has a symmetry type: directed (the default), unordered or cyclic. Binary edges are lines, larger edges are regions, a unary edge is a disk round its vertex."
+  },
+  {
+   "type": "code",
+   "source": "h = Hypergraph([[1, 2], [2, 3], Edge([1, 2, 3], \"Unordered\"), [4, 5, 6, 7], [3, 4], [7]])\nh"
+  },
+  {
+   "type": "text",
+   "source": "A directed hyperedge shows its order with half-arrowheads inside the region, growing along the sequence $v_1 \\to v_2 \\to \\dots \\to v_k \\to v_1$. Edges are stored in the canonical order of their symmetry, so the same hyperedge written two ways is one edge:"
+  },
+  {
+   "type": "code",
+   "source": "[Edge([3, 1, 2], \"Cyclic\") == Edge([1, 2, 3], \"Cyclic\"), Edge([1, 3, 2], \"Cyclic\") == Edge([1, 2, 3], \"Cyclic\")]"
+  },
+  {
+   "type": "text",
+   "source": "Labels are written beside what they name; `Highlight` marks edges in red, as the paclet marks the match of a rewrite rule."
+  },
+  {
+   "type": "code",
+   "source": "g = Hypergraph([Vertex(1, \"a\"), Vertex(2, \"b\")], [Edge([1, 2, 3], \"Cyclic\"), Edge([3, 4], \"Directed\", \"f\"), Edge([4, 5, 5])])\nHypergraphPlot(g, VertexLabels = true, Highlight = [2])"
+  },
+  {
+   "type": "text",
+   "source": "## Isomorphism and canonical forms\n\nTwo hypergraphs are isomorphic when renaming vertices carries one onto the other, each edge keeping its symmetry type. Labels count only up to renaming: `A, B, C` along a path is isomorphic to `C, B, A` by exchanging `A` and `C`."
+  },
+  {
+   "type": "code",
+   "source": "l1 = Hypergraph([Vertex(1, \"A\"), Vertex(2, \"B\"), Vertex(3, \"C\")], [[1, 2], [2, 3]])\nl3 = Hypergraph([Vertex(1, \"C\"), Vertex(2, \"B\"), Vertex(3, \"A\")], [[1, 2], [2, 3]])\nFindHypergraphIsomorphism(l1, l3, Labels = true)"
+  },
+  {
+   "type": "text",
+   "source": "The canonical form renames vertices $1, \\dots, n$ and replaces labels by tokens $\\ell_1, \\ell_2, \\dots$, so isomorphic hypergraphs have equal canonical forms."
+  },
+  {
+   "type": "code",
+   "source": "x1 = Hypergraph([Edge([1, 2, 3], \"Unordered\"), Edge([3, 4], \"Directed\", \"f\"), Edge([1, 4, 5], \"Cyclic\")])\nx2 = Hypergraph([Edge([30, 20, 10], \"Unordered\"), Edge([30, 40], \"Directed\", \"g\"), Edge([40, 50, 10], \"Cyclic\")])\n[IsomorphicHypergraphQ(x1, x2), CanonicalHypergraph(x1) == CanonicalHypergraph(x2)]"
+  },
+  {
+   "type": "code",
+   "source": "CanonicalHypergraph(x1)"
+  },
+  {
+   "type": "text",
+   "source": "## Rewrite rules\n\nA rule is a pair of hypergraphs, drawn input → output on a shared layout; the vertices it creates are red. Applying it to a hypergraph gives one **event** per way its input matches: the match in red on the left, what was made in red on the right."
+  },
+  {
+   "type": "code",
+   "source": "sub = HypergraphRule([[1, 2]], [[1, 3], [3, 2]])"
+  },
+  {
+   "type": "code",
+   "source": "sub(Hypergraph([[1, 2], [2, 3]]))"
+  },
+  {
+   "type": "text",
+   "source": "In a rule's input, a label that is a bare name is a **variable**: it binds whatever label it meets, and the output's labels are written in terms of it. This composes two arrows into one named after both:"
+  },
+  {
+   "type": "code",
+   "source": "compose = HypergraphRule([Edge([1, 2], \"Directed\", a), Edge([2, 3], \"Directed\", b)], [Edge([1, 3], \"Directed\", Row([\"(\", a, b, \")\"]))])\ncompose(Hypergraph([Edge([1, 2], \"Directed\", \"f\"), Edge([2, 3], \"Directed\", \"g\"), Edge([3, 4], \"Directed\", \"k\")]))"
+  },
+  {
+   "type": "text",
+   "source": "## Rewriting systems and causality\n\nA rewriting system is rules with a state to start from. Its evolution applies every rule in every way to every state of the last generation; the **evolution graph** is the tree of states it reaches, each drawn."
+  },
+  {
+   "type": "code",
+   "source": "meet = HypergraphRewritingSystem(sub, Hypergraph([[1, 2], [2, 3]]))\nmeet(\"EvolutionGraph\", 2)"
+  },
+  {
+   "type": "text",
+   "source": "The **causal graph** has one vertex per event, drawn as the event, and an edge from an event to a later one on the same path that touches some of the same elements. What counts as touching is the option `CausalDependence`: `\"Elements\"` (any shared vertex or edge, the default), `\"Edges\"` or `\"Vertices\"`. Two subdivisions that meet only at a vertex are related by elements but not by edges:"
+  },
+  {
+   "type": "code",
+   "source": "[meet(\"CausalGraph\", 2)[\"EdgeCount\"], meet(\"CausalGraph\", 2, CausalDependence = \"Edges\")[\"EdgeCount\"]]"
+  },
+  {
+   "type": "code",
+   "source": "meet(\"CausalGraph\", 2, CausalDependence = \"Edges\")"
+  },
+  {
+   "type": "text",
+   "source": "## Hypergraphs as hypermatrices\n\nAn edge of arity $k$ is an index tuple of an array of order $k$, and the symmetry types correspond: Directed ↔ Rigid, Cyclic ↔ Cyclic, Unordered ↔ Symmetric. The **adjacency hypermatrix** has one array per arity and symmetry type, indexed by the vertices in order; each entry counts the edges sitting there, up to the symmetry."
+  },
+  {
+   "type": "code",
+   "source": "adj = Hypergraph([Edge([1, 2, 3], \"Unordered\"), Edge([3, 4]), Edge([1, 2])])"
+  },
+  {
+   "type": "code",
+   "source": "AdjacencyHypermatrix(adj)"
+  },
+  {
+   "type": "text",
+   "source": "Renaming the vertices permutes the indices, so isomorphic hypergraphs can have different adjacency hypermatrices; after `CanonicalHypergraph` they agree."
+  },
+  {
+   "type": "code",
+   "source": "other = Hypergraph([Edge([\"z\", \"a\", \"m\"], \"Unordered\"), Edge([\"m\", \"q\"]), Edge([\"z\", \"a\"])])\n[AdjacencyHypermatrix(adj) == AdjacencyHypermatrix(other), AdjacencyHypermatrix(CanonicalHypergraph(adj)) == AdjacencyHypermatrix(CanonicalHypergraph(other))]"
+  },
+  {
+   "type": "text",
+   "source": "## Plex diagrams\n\nA **plex diagram** (heaps-of-fish §4) is a labelled hypergraph: edges are plexes (arrays up to the order of their indices), named by their labels; vertices are indices, and a vertex marked • is summed over. The matrix product is two plexes sharing a marked index:"
+  },
+  {
+   "type": "code",
+   "source": "mm = PlexDiagram([[1, 2], [2, 3]], [2], Names = [\"a\", \"b\"])"
+  },
+  {
+   "type": "code",
+   "source": "PlexProduct(mm, [[[1, 2], [3, 4]], [[0, 1], [1, 0]]])"
+  },
+  {
+   "type": "text",
+   "source": "A plex diagram is also a rewrite rule: its plexes become one plex on its free indices, labelled by the product. Rewriting a chain of three matrices in both possible ways gives two different labels, `M(M(a, b), c)` and `M(a, M(b, c))`, with the same value: associativity as confluence."
+  },
+  {
+   "type": "code",
+   "source": "chain = PlexDiagram([[1, 2], [2, 3], [3, 4]], [2, 3], Names = [\"a\", \"b\", \"c\"])\nM = PlexRule(mm, \"M\")\nPlexEvents(M, chain)"
+  },
+  {
+   "type": "code",
+   "source": "arr = {\"a\": [[1, 2], [3, 4]], \"b\": [[0, 1], [1, 0]], \"c\": [[2, 0], [0, 3]]}\nends = Map(e => PlexEvents(M, e[\"Hypergraph\"])[1][\"Hypergraph\"], PlexEvents(M, chain))\n[Map(h => EdgeLabel(EdgeList(h)[1]), ends), Map(h => PlexProduct(h, arr, Diagrams = {\"M\": mm}) == PlexProduct(chain, arr), ends)]"
+  },
+  {
+   "type": "text",
+   "source": "## Identities of plex products\n\nA term written with undefined heads, such as `Mul(a, Tr(b))`, names operations in a dictionary of plex diagrams. `PlexEqualQ` decides whether two terms are the same operation: their diagrams are isomorphic by a map fixing every variable and the output order. Transposition is the plex diagram with one plex on $(j, i)$."
+  },
+  {
+   "type": "code",
+   "source": "tr = PlexDiagram([[2, 1]], Names = [\"x\"])\nops = {\"Mul\": mm, \"Tr\": tr}\n[PlexEqualQ(Tr(Tr(a)), a, ops), PlexEqualQ(Tr(Mul(a, b)), Mul(Tr(b), Tr(a)), ops), PlexEqualQ(Mul(a, b), Mul(b, a), ops)]"
+  },
+  {
+   "type": "text",
+   "source": "`PlexTerms` lists every term in which each variable occurs once; `PlexIdentities` groups terms into identities, each drawn as the diagram its terms share (output indices $i, j$ in order, contracted ones solid dark). Over two matrices with at most three operations, every identity follows from $(a^\\top)^\\top = a$ and $(ab)^\\top = b^\\top a^\\top$."
+  },
+  {
+   "type": "code",
+   "source": "PlexIdentities(PlexTerms(ops, [a, b], MaxOperations = 3), ops)"
+  },
+  {
+   "type": "text",
+   "source": "The fish semiheap, two ways. Rewriting the long fish of five plexes with the fish rule in every order gives three terms with its value (associativity as confluence); the search over all two-operation fish terms in five variables finds exactly the instances of the semiheap axiom, 120 classes of three."
+  },
+  {
+   "type": "code",
+   "source": "fishd = PlexDiagram([[\"i\", \"j\", \"p\"], [\"q\", \"r\", \"p\"], [\"q\", \"r\", \"k\"]], [\"p\", \"q\", \"r\"], Names = [\"x\", \"y\", \"z\"])\nlong = PlexDiagram([[1, 2, 3], [4, 5, 3], [4, 5, 6], [7, 8, 6], [7, 8, 9]], [3, 4, 5, 6, 7, 8], Names = [\"a\", \"b\", \"c\", \"d\", \"e\"])\nPlexIdentities(PlexNormalTerms(long, PlexRule(fishd, \"F\")), {\"F\": fishd})"
+  },
+  {
+   "type": "code",
+   "source": "fishIds = PlexIdentities(PlexTerms({\"F\": fishd}, [a, b, c, d, e], Order = 3), {\"F\": fishd})\n[Length(fishIds), fishIds[1][\"Terms\"]]"
+  }
+ ]
+}

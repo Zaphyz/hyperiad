@@ -1,0 +1,78 @@
+{
+ "title": "Input–output edges: a first look",
+ "cells": [
+  {
+   "type": "text",
+   "source": "# Input–output edges: a first look\n\nA hyperedge has a symmetry type: **directed**, **cyclic** or **unordered**. The **input–output** type splits its vertices into an input block and an output block, both nonempty, each with one of those three types. It is drawn in the same web-like style: each block is a lobe of its own type, and the two lobes are joined by a **waist** with one arrow from inputs to outputs.\n\nThis is the edge type of multicategories, operads, polycategories and PROPs, used in the theme *Diagrammatic algebroids: foundations* (q01)."
+  },
+  {
+   "type": "text",
+   "source": "## The nine block types\n\n`Edge([[inputs], [outputs]], [S, T], label)`. A directed block shows its order with half-arrowheads (the first hollow), a cyclic block the circular badge, an unordered block nothing."
+  },
+  {
+   "type": "code",
+   "source": "[Hypergraph([Edge([[1, 2], [3, 4]], [\"Unordered\", \"Unordered\"], \"f\")]),\n Hypergraph([Edge([[1, 2, 3], [4, 5]], [\"Directed\", \"Unordered\"], \"g\")]),\n Hypergraph([Edge([[1, 2, 3], [4, 5, 6]], [\"Cyclic\", \"Cyclic\"], \"h\")]),\n Hypergraph([Edge([[1], [2, 3, 4]], [\"Directed\", \"Directed\"], \"k\")])]"
+  },
+  {
+   "type": "text",
+   "source": "## One input, one output is a directed edge\n\nThe two are the same edge: equal, matched and drawn alike."
+  },
+  {
+   "type": "code",
+   "source": "Edge([[\"x\"], [\"y\"]], \"InputOutput\", \"f\") == Edge([\"x\", \"y\"], \"Directed\", \"f\")"
+  },
+  {
+   "type": "code",
+   "source": "io = Edge([[2, 1], [3, 5, 4]], [\"Unordered\", \"Cyclic\"], \"f\")\n[EdgeSymmetry(io), EdgeInputs(io), EdgeOutputs(io)]"
+  },
+  {
+   "type": "text",
+   "source": "## Blocks are nonempty\n\nAn edge with no inputs or no outputs is refused: inputs and outputs are elements of the hyperedge, as for every other type."
+  },
+  {
+   "type": "code",
+   "source": "Edge([[], [\"y\"]], \"InputOutput\")",
+   "expect": "error"
+  },
+  {
+   "type": "text",
+   "source": "## A multicategory law: plug an output into an input\n\nThe output of `g` feeds the first input of `f`; the object between them is contracted. The composite's label is a term in the factors' labels."
+  },
+  {
+   "type": "code",
+   "source": "plug = HypergraphRule(\n  [Edge([[1, 2], [3]], \"InputOutput\", g), Edge([[3, 4], [5]], \"InputOutput\", f)],\n  Hypergraph([1, 2, 4, 5], [Edge([[1, 2, 4], [5]], \"InputOutput\", o(f, g))]))\nplug"
+  },
+  {
+   "type": "code",
+   "source": "tree = Hypergraph([Edge([[\"a\", \"b\"], [\"c\"]], \"InputOutput\", \"G\"),\n                   Edge([[\"c\", \"d\"], [\"e\"]], \"InputOutput\", \"F\"),\n                   Edge([[\"e\", \"h\"], [\"k\"]], \"InputOutput\", \"H\")])\ntree"
+  },
+  {
+   "type": "text",
+   "source": "Saturation adds every composite the rule can see and keeps the factors. The rule plugs a two-input `g` into a two-input `f`, so the three-input composites it makes are not plugged again: one rule is one arity. A multicategory's composition is a *family* of rules, one per arity of the factors: a rule schema. Whether a law may be such a family is a decision point of q01."
+  },
+  {
+   "type": "code",
+   "source": "sat = HypergraphSaturate(tree, [plug])\nsat[\"Final\"]"
+  },
+  {
+   "type": "text",
+   "source": "## A polycategory law: compose along one object\n\n`f` has an unordered block of inputs and outputs; `g` takes one of `f`'s outputs. The result keeps `f`'s other outputs beside `g`'s."
+  },
+  {
+   "type": "code",
+   "source": "poly = HypergraphRule(\n  [Edge([[1, 2], [3, 4]], [\"Unordered\", \"Unordered\"], f), Edge([[3], [5, 6]], [\"Directed\", \"Unordered\"], g)],\n  Hypergraph([1, 2, 4, 5, 6], [Edge([[1, 2], [4, 5, 6]], [\"Unordered\", \"Unordered\"], o(g, f))]))\npoly"
+  },
+  {
+   "type": "code",
+   "source": "poly(Hypergraph([Edge([[\"p\", \"q\"], [\"x\", \"y\"]], [\"Unordered\", \"Unordered\"], \"F\"),\n                 Edge([[\"x\"], [\"u\", \"v\"]], [\"Directed\", \"Unordered\"], \"G\")]))"
+  },
+  {
+   "type": "text",
+   "source": "## Isomorphism respects the blocks\n\nWithin each block only its own symmetry acts; inputs never trade places with outputs."
+  },
+  {
+   "type": "code",
+   "source": "a = Hypergraph([Edge([[\"x\", \"y\"], [\"z\"]], [\"Unordered\", \"Directed\"])])\nb = Hypergraph([Edge([[\"x\"], [\"y\", \"z\"]], [\"Directed\", \"Unordered\"])])\n[IsomorphicHypergraphQ(a, a), IsomorphicHypergraphQ(a, b)]"
+  }
+ ]
+}

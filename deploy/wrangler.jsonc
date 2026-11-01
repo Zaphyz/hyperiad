@@ -1,0 +1,32 @@
+// Hyperiad's public server: a Worker in front of Cloudflare Containers.
+// Deployed by Workers Builds from this folder (root directory deploy, deploy command
+// `npx wrangler deploy`). The image is built from the repository root, which holds the packages.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hyperiad-server",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "routes": [{ "pattern": "arity.science/api/hyperiad/*", "zone_name": "arity.science" }],
+  "observability": { "enabled": true },
+  "containers": [
+    {
+      "class_name": "HyperiadServer",
+      "image": "./Dockerfile",
+      "image_build_context": "..",
+      // 1/2 vCPU and 4 GiB: one job at a time per instance, each job capped at 1 GiB.
+      "instance_type": "standard-1",
+      "max_instances": 2
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "HYPERIAD", "class_name": "HyperiadServer" },
+      { "name": "GATE", "class_name": "Gate" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["HyperiadServer"] },
+    { "tag": "v2", "new_sqlite_classes": ["Gate"] }
+  ]
+}

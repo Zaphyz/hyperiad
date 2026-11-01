@@ -1,0 +1,69 @@
+{
+ "title": "Hypergraph rewriting: diagrams and composition",
+ "cells": [
+  {
+   "type": "text",
+   "source": "# Hypergraph rewriting: diagrams and composition\n\nOne matcher, applied in several ways. A rule's input matches by **labels** (a bare name binds, a composite label holding names is a structured pattern) and by **vertices and edges**, injectively or not. Applied event by event it rewrites; applied all at once it composes; applied until nothing changes it saturates."
+  },
+  {
+   "type": "text",
+   "source": "## Structured label patterns\n\nVertex labels are objects and edge labels morphisms. The input label `o(x, id(X))` matches the composite `o(f, id(A))`, binding `x` to `f` and `X` to `A`: a unit law as a rule."
+  },
+  {
+   "type": "code",
+   "source": "unitR = HypergraphRule([Edge([1, 2], \"Directed\", o(x, id(X)))], [Edge([1, 2], \"Directed\", x)])\nunitR(Hypergraph([Edge([\"A\", \"B\"], \"Directed\", o(\"f\", id(\"A\")))]))"
+  },
+  {
+   "type": "text",
+   "source": "## Composition of graphs is a product of hypermatrices\n\nEach input edge names the factor it comes from. Every match over the factors gives one output edge: here a path $u \\to v$ in $g$ then $v \\to w$ in $h$ gives $u \\to w$. Matching is non-injective, so a loop or a back-and-forth path counts."
+  },
+  {
+   "type": "code",
+   "source": "comp = HypergraphRule([Edge([1, 2], \"Directed\", a), Edge([2, 3], \"Directed\", b)], [[1, 3]])\ng = Hypergraph([1, 2, 3], [[1, 2], [2, 3], [3, 3]])\nh = Hypergraph([1, 2, 3], [[2, 1], [3, 1]])\nHypergraphCompose(comp, {\"a\": g, \"b\": h})"
+  },
+  {
+   "type": "text",
+   "source": "The rule is a plex diagram (its middle vertex contracted), and the adjacency array of the composite is that plex product of the factors' adjacency arrays, here the matrix product."
+  },
+  {
+   "type": "code",
+   "source": "CompositionPlexDiagram(comp)"
+  },
+  {
+   "type": "code",
+   "source": "CompositionAdjacencyProduct(comp, {\"a\": g, \"b\": h})"
+  },
+  {
+   "type": "code",
+   "source": "AdjacencyHypermatrix(HypergraphCompose(comp, {\"a\": g, \"b\": h}))[1] == CompositionAdjacencyProduct(comp, {\"a\": g, \"b\": h})"
+  },
+  {
+   "type": "text",
+   "source": "## A commutative square, saturated\n\nGenerating rules add: composition of $x: X \\to Y$ and $y: Y \\to Z$ adds $o(y, x)$; every object gets an identity. Labels are syntax, so the category's laws are **equation rules**: the two unit laws and associativity. Step through the rounds: what each round adds is amber. `Congruence = true` lets the laws act inside composite labels too, as equality of morphisms does in a category."
+  },
+  {
+   "type": "code",
+   "source": "sq = Hypergraph([Vertex(\"A\", \"A\"), Vertex(\"B\", \"B\"), Vertex(\"C\", \"C\"), Vertex(\"D\", \"D\")], [Edge([\"A\", \"B\"], \"Directed\", \"f\"), Edge([\"B\", \"D\"], \"Directed\", \"g\"), Edge([\"A\", \"C\"], \"Directed\", \"h\"), Edge([\"C\", \"D\"], \"Directed\", \"k\")])\ncompose = HypergraphRule(Hypergraph([Vertex(1, X), Vertex(2, Y), Vertex(3, Z)], [Edge([1, 2], \"Directed\", x), Edge([2, 3], \"Directed\", y)]), Hypergraph([Vertex(1, X), Vertex(3, Z)], [Edge([1, 3], \"Directed\", o(y, x))]))\nidentity = HypergraphRule(Hypergraph([Vertex(1, X)], []), Hypergraph([Vertex(1, X)], [Edge([1, 1], \"Directed\", id(X))]))\nunits = [HypergraphRule([Edge([1, 2], \"Directed\", o(id(Y), x))], [Edge([1, 2], \"Directed\", x)]), unitR, HypergraphRule([Edge([1, 2], \"Directed\", o(o(z, y), x))], [Edge([1, 2], \"Directed\", o(z, o(y, x)))])]\nfree = HypergraphSaturate(sq, [compose, identity], Equations = units, Congruence = true)"
+  },
+  {
+   "type": "text",
+   "source": "Two paths from A to D compose to different labels: the free square does not commute."
+  },
+  {
+   "type": "code",
+   "source": "ParallelEdges(free[\"Final\"])"
+  },
+  {
+   "type": "text",
+   "source": "Commutativity is one more equation, merging the two composites. Saturated with it, nothing is left parallel."
+  },
+  {
+   "type": "code",
+   "source": "commutes = HypergraphRule([Edge([1, 2], \"Directed\", o(\"k\", \"h\")), Edge([1, 2], \"Directed\", o(\"g\", \"f\"))], [Edge([1, 2], \"Directed\", o(\"g\", \"f\"))])\nsquare = HypergraphSaturate(sq, [compose, identity], Equations = Join(units, [commutes]), Congruence = true)\nParallelEdges(square[\"Final\"])"
+  },
+  {
+   "type": "code",
+   "source": "square[\"Final\"]"
+  }
+ ]
+}

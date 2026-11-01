@@ -1,0 +1,43 @@
+[project]
+name = "hyperiad"
+dynamic = ["version"]
+description = "Hyperiad: a language and notebook for higher-arity mathematics (hypermatrices, hypergraphs, rewriting)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2.0", "sympy>=1.13", "networkx>=3.2"]
+
+[project.urls]
+Homepage = "https://arity.science/hyperiad/"
+Source = "https://github.com/Zaphyz/hyperiad"
+
+[project.scripts]
+hyperiad = "hyperiad.server:main"
+
+# The toolkits register their definitions in the shared registry when loaded.
+[project.entry-points."frontier.toolkits"]
+hypermatrix = "hypermatrix"
+infrageometry = "infrageometry"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/hyperiad/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hyperiad", "src/frontier", "src/hypermatrix", "src/infrageometry"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

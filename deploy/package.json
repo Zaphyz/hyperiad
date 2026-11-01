@@ -1,0 +1,16 @@
+{
+  "name": "hyperiad-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "check": "wrangler types && tsc --noEmit"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "wrangler": "4.156.0"
+  }
+}
